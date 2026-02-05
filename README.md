@@ -15,3 +15,26 @@ Local Deployment: Run the app locally on your machine with GPU acceleration.
 Gradio Interface: Web-based GUI for interactive querying.
 
 Hugging Face Models: Integrates open-source LLMs, with support for private models if you have access.
+System Architecture
+```mermaid
+flowchart LR
+    U[User] --> UI[Gradio UI]
+
+    UI --> QH[Query Handler / QA Chain]
+
+    QH --> EMQ["Embedding Model<br/>(Query)"]
+    EMQ --> VS["Vector Store<br/>(FAISS / Chroma)"]
+
+    VS --> R["Retriever<br/>(Top-k Policy Chunks)"]
+    R --> QH
+
+    QH --> LLM["Local LLM<br/>(HuggingFace Model on GPU)"]
+    LLM --> UI
+
+    %% Ingestion Pipeline
+    subgraph Ingestion["Ingestion Pipeline (Offline)"]
+        D[Policy Documents] --> TL[Text Loader]
+        TL --> CH[Chunking]
+        CH --> EMD["Embedding Model<br/>(Documents)"]
+        EMD --> VS
+    end
